@@ -1,0 +1,13 @@
+??.??.26:   0.0.0   created with verbs only (terminal version)
+??.??.26:   1.0.0   tkinter version created
+22.06.26:   1.0.1   update log created; timer feature removed until further notice
+23.06.26:   1.0.2   next button added; allows users to see their feedback before next round starts
+28.06.26:   1.1.0   added verbs: sum eo fero volo facio; refactored verbs.py to use x.grid() for tidiness; timer feature added discreetly (is stored but not shown)
+29.06.26:   1.2.0   added verbs: conor vereor loquor patior orior; adding a new verb does not require adjustments in code now
+29.06.26:   1.2.1   fixed deponents to store conor as active eg. the only passive forms in deponents are the gerundives (futr pas ptcp)
+03.07.26:   1.3.0   added "results" tab to verbs
+03.07.26:   1.3.1   added scrollbar to results tab (with generalised scrollable frame func!)
+04.07.26:   1.4.0   added typing tab and linked it to results feature; fixed setup bug; moved timers to a separate class in a separate file
+13.07.26:   1.4.1   simplified code to both store and display abbrevs, rather than storing actuals and displaying abbrevs
+17.07.26:   1.4.2   added keybinds: enter to confirm, space for next
+21.07.26:   1.5.0   added nouns
