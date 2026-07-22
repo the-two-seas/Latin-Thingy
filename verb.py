@@ -1,24 +1,15 @@
 # import necessary modules
 import random
 import tkinter as tk
-import tables, timer_
+import tab, tables, timer_
 from tkinter import ttk
 from tkinter import messagebox as msg
 # verbTab class
-class VerbTab:
+class VerbTab(tab.Tab):
     """the class for the verb's tab in the full program's notebook widget"""
-    def __init__(self, *, width: int, height: int, displayFont: tuple[str, int], bgCol: str, fgCol: str, selCol: str):
-        self.parsingCorrect, self.parsingIncorrect = 0, 0
-        self.typingCorrect, self.typingIncorrect = 0, 0
-        self.width, self.height = width, height
-        self.displayFont = displayFont
-        self.bgCol, self.fgCol = bgCol, fgCol
-        self.selCol = selCol
-        self.parsingTimer = timer_.Timer(dp=2)
-        self.typingTimer = timer_.Timer(dp=2)
-        self.evenlyChoose = True  # this will be customisable!
-        self.lastTab = None
-        self.results = []
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.evenlyChoose = True        
         self.components = {
             "verbs": [v for v in tables.VERBS.keys()],
             "tenses": ["PRES", "IMPF", "PERF", "PLPF", "FUTR", "FTPF"],
@@ -53,9 +44,6 @@ class VerbTab:
     # general funcs
     def verbFormExists(self, verb: str, tense: str, voice: str, mood: str) -> bool:
         return (verb, tense, voice, mood) in self.validForms
-    def selected(self, varDict: dict) -> list[str]:
-        """returns all vars in the varDict which are selected"""
-        return [name for name, var in varDict.items() if var.get()]
     def possibleParsesOfVerb(self, form: str) -> list[str]:
         """
         reverse looks through tables.VERBS and finds all parses for 'vb'
@@ -116,11 +104,9 @@ class VerbTab:
                 case _:
                     raise ValueError(f"{mo} is an invalid mood. (getLatinVerb)")
         return lv, vb, tn, vo, mo, ps, gn, cs, nm
-    def currentTab(self) -> tk.Frame:
-        return self.verbNotebook.nametowidget(self.verbNotebook.select())
     def onTabChanged(self, event) -> None:
         # get the current and previous tabs
-        current = self.currentTab()
+        current = self.currentTab(self.verbNotebook)
         previous = self.lastTab
         self.lastTab = current
         if current in [self.parsingFrame, self.typingFrame]:  # the user just entered parsing OR typing mode
@@ -136,43 +122,8 @@ class VerbTab:
             self.nextParse()  # refreshes the verb to avoid cheating ig...?
         if current is self.typingFrame:  # the user just entered typing mode
             self.nextTyping()  # refresh
-    def displaySelector(self, *, frame: tk.Frame, thing: str, mode: str, widgetDict: dict, varOrDict, width: int, cols: int = 6, fs: int = 8, command=None, selectColour: str) -> None:
-        """displays either the cbs or rbs"""
-        for i, abbrev in enumerate(self.components[thing]):
-            row = i // cols
-            col = i % cols
-            match mode:
-                case "rb":
-                    widget = tk.Radiobutton(frame, text=abbrev, value=abbrev, variable=varOrDict, indicatoron=False, width=width, font=("Arial", fs), selectcolor=selectColour, command=(lambda a=abbrev: command(a)) if command else None)
-                case "cb":
-                    v = tk.BooleanVar()
-                    widget = tk.Checkbutton(frame, text=abbrev, variable=v, indicatoron=False, width=width, selectcolor=selectColour, command=command, font=("Arial", fs))
-                    varOrDict[abbrev] = v
-                    v.set(1)  # checks it
-                case _:
-                    raise ValueError(f"'{mode}' is not 'rb' or 'cb'")
-            widget.grid(row=row, column=col, padx=2, pady=2)
-            widgetDict[abbrev] = widget
-    def makeScrollableFrame(self, parent, *, bg) -> tuple[tk.Frame]:
-        """since frames cant use scrollwheels, it must be placed inside a canvas. returns "outer" (put this in the notebook), and "frame" (put widgets in here)"""
-        # create widgets
-        outer = tk.Frame(parent, bg=bg)  # stuff created in this method goes in here
-        canvas = tk.Canvas(outer, bg=bg, highlightthickness=0)
-        scrollbar = tk.Scrollbar(outer, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=scrollbar.set)  # bind scroller to the CANVAS
-        frame = tk.Frame(canvas, bg=bg)  # here we go
-        window = canvas.create_window((0, 0), window=frame, anchor="nw")
-        # no idea what this does!
-        frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-        canvas.bind("<Configure>", lambda e: canvas.itemconfigure(window, width=e.width))
-        def mousewheel(event): canvas.yview_scroll(-event.delta // 120, "units")  # function to scroll with mousewheel
-        frame.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", mousewheel))  # can only scroll with mousewheel if mouse is inside frame
-        frame.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))  # else, disable scrolling
-        canvas.pack(side="left", fill="both", expand=True)  # put it in!
-        scrollbar.pack(side="right", fill="y")  # put it in!
-        return outer, frame
     def enterPressed(self, _) -> None:
-        current = self.currentTab()
+        current = self.currentTab(self.verbNotebook)
         if current is self.parsingFrame:
             if self.parsingConfirmButton["state"] == "normal":
                 self.confirmParsing()
@@ -180,7 +131,7 @@ class VerbTab:
             if self.typingConfirmButton["state"] == "normal":
                 self.confirmTyping()
     def spacePressed(self, _) -> None:
-        current = self.currentTab()
+        current = self.currentTab(self.verbNotebook)
         if current is self.parsingFrame:
             if self.parsingNextButton.winfo_ismapped():  # if the next button is shown
                 self.nextParse()
@@ -564,14 +515,14 @@ time taken: {timeTaken}
         self.reviewCaseUserval  .set("NOM")
         self.reviewNumberUserval.set("SG")
         # display the verb RBs
-        self.displaySelector(frame=self.reviewVerbFrame,   mode="rb", thing="verbs",   widgetDict=self.reviewVerbRBs,   varOrDict=self.reviewVerbUserval,   width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.reviewTenseFrame,  mode="rb", thing="tenses",  widgetDict=self.reviewTenseRBs,  varOrDict=self.reviewTenseUserval,  width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewVoiceFrame,  mode="rb", thing="voices",  widgetDict=self.reviewVoiceRBs,  varOrDict=self.reviewVoiceUserval,  width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewMoodFrame,   mode="rb", thing="moods",   widgetDict=self.reviewMoodRBs,   varOrDict=self.reviewMoodUserval,   width=6, command=self.displayReviewBeyondMoods, selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewPersonFrame, mode="rb", thing="people",  widgetDict=self.reviewPersonRBs, varOrDict=self.reviewPersonUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewGenderFrame, mode="rb", thing="genders", widgetDict=self.reviewGenderRBs, varOrDict=self.reviewGenderUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewCaseFrame,   mode="rb", thing="cases",   widgetDict=self.reviewCaseRBs,   varOrDict=self.reviewCaseUserval,   width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewNumberFrame, mode="rb", thing="numbers", widgetDict=self.reviewNumberRBs, varOrDict=self.reviewNumberUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewVerbFrame,   mode="rb", options=self.components["verbs"],   widgetDict=self.reviewVerbRBs,   varOrDict=self.reviewVerbUserval,   width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol, cols=5)
+        self.displaySelector(frame=self.reviewTenseFrame,  mode="rb", options=self.components["tenses"],  widgetDict=self.reviewTenseRBs,  varOrDict=self.reviewTenseUserval,  width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewVoiceFrame,  mode="rb", options=self.components["voices"],  widgetDict=self.reviewVoiceRBs,  varOrDict=self.reviewVoiceUserval,  width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewMoodFrame,   mode="rb", options=self.components["moods"],   widgetDict=self.reviewMoodRBs,   varOrDict=self.reviewMoodUserval,   width=6, command=self.displayReviewBeyondMoods, selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewPersonFrame, mode="rb", options=self.components["people"],  widgetDict=self.reviewPersonRBs, varOrDict=self.reviewPersonUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewGenderFrame, mode="rb", options=self.components["genders"], widgetDict=self.reviewGenderRBs, varOrDict=self.reviewGenderUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.reviewCaseRBs,   varOrDict=self.reviewCaseUserval,   width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.reviewNumberRBs, varOrDict=self.reviewNumberUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
         # add the frame to the parent notebook
         parentNotebook.add(self.reviewFrame, text="REVIEW")
     def buildSetupSubtab(self, parentNotebook: ttk.Notebook) -> None:
@@ -598,10 +549,10 @@ time taken: {timeTaken}
         self.setupVoiceFrame.grid(row=3, column=1, sticky="ew")
         self.setupMoodFrame .grid(row=4, column=1, sticky="ew")
         # create the display the setup CBs
-        self.displaySelector(frame=self.setupVerbFrame,  mode="cb", thing="verbs",  widgetDict=self.setupVerbCBs,  varOrDict=self.setupVerbUservals,  width=6, command=self.updateAllowance, selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.setupTenseFrame, mode="cb", thing="tenses", widgetDict=self.setupTenseCBs, varOrDict=self.setupTenseUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
-        self.displaySelector(frame=self.setupVoiceFrame, mode="cb", thing="voices", widgetDict=self.setupVoiceCBs, varOrDict=self.setupVoiceUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
-        self.displaySelector(frame=self.setupMoodFrame,  mode="cb", thing="moods",  widgetDict=self.setupMoodCBs,  varOrDict=self.setupMoodUservals,  width=6, command=self.updateAllowance, selectColour=self.selCol)
+        self.displaySelector(frame=self.setupVerbFrame,  mode="cb", options=self.components["verbs"],  widgetDict=self.setupVerbCBs,  varOrDict=self.setupVerbUservals,  width=6, command=self.updateAllowance, selectColour=self.selCol, cols=5)
+        self.displaySelector(frame=self.setupTenseFrame, mode="cb", options=self.components["tenses"], widgetDict=self.setupTenseCBs, varOrDict=self.setupTenseUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
+        self.displaySelector(frame=self.setupVoiceFrame, mode="cb", options=self.components["voices"], widgetDict=self.setupVoiceCBs, varOrDict=self.setupVoiceUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
+        self.displaySelector(frame=self.setupMoodFrame,  mode="cb", options=self.components["moods"],  widgetDict=self.setupMoodCBs,  varOrDict=self.setupMoodUservals,  width=6, command=self.updateAllowance, selectColour=self.selCol)
         # other
         self.setupButtonsFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
         self.setupButtonsFrame.grid(row=5, column=1, sticky="ew")
@@ -655,13 +606,13 @@ time taken: {timeTaken}
         self.parsingCaseRBs,   self.parsingCaseUserval   = {}, tk.StringVar()
         self.parsingNumberRBs, self.parsingNumberUserval = {}, tk.StringVar()
         # display the verb RBs
-        self.displaySelector(frame=self.parsingTenseFrame,  mode="rb", thing="tenses",  widgetDict=self.parsingTenseRBs,  varOrDict=self.parsingTenseUserval,  width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingVoiceFrame,  mode="rb", thing="voices",  widgetDict=self.parsingVoiceRBs,  varOrDict=self.parsingVoiceUserval,  width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingMoodFrame,   mode="rb", thing="moods",   widgetDict=self.parsingMoodRBs,   varOrDict=self.parsingMoodUserval,   width=6, command=self.displayParsingBeyondMoods,  selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingPersonFrame, mode="rb", thing="people",  widgetDict=self.parsingPersonRBs, varOrDict=self.parsingPersonUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingGenderFrame, mode="rb", thing="genders", widgetDict=self.parsingGenderRBs, varOrDict=self.parsingGenderUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingCaseFrame,   mode="rb", thing="cases",   widgetDict=self.parsingCaseRBs,   varOrDict=self.parsingCaseUserval,   width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingNumberFrame, mode="rb", thing="numbers", widgetDict=self.parsingNumberRBs, varOrDict=self.parsingNumberUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingTenseFrame,  mode="rb", options=self.components["tenses"],  widgetDict=self.parsingTenseRBs,  varOrDict=self.parsingTenseUserval,  width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingVoiceFrame,  mode="rb", options=self.components["voices"],  widgetDict=self.parsingVoiceRBs,  varOrDict=self.parsingVoiceUserval,  width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingMoodFrame,   mode="rb", options=self.components["moods"],   widgetDict=self.parsingMoodRBs,   varOrDict=self.parsingMoodUserval,   width=6, command=self.displayParsingBeyondMoods,  selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingPersonFrame, mode="rb", options=self.components["people"],  widgetDict=self.parsingPersonRBs, varOrDict=self.parsingPersonUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingGenderFrame, mode="rb", options=self.components["genders"], widgetDict=self.parsingGenderRBs, varOrDict=self.parsingGenderUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.parsingCaseRBs,   varOrDict=self.parsingCaseUserval,   width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.parsingNumberRBs, varOrDict=self.parsingNumberUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
         self.parsingConfirmButton = tk.Button(self.parsingFrame, text="CHECK", font=("Arial bold", 8), state="disabled", command=self.confirmParsing)
         self.parsingConfirmButton.grid(row=999, column=1, sticky="ew")
         self.parsingNextButton = tk.Button(self.parsingFrame, text="NEXT", font=("Arial", 10), width=6, command=self.nextParse)

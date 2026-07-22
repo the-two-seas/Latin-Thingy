@@ -1,23 +1,14 @@
 # import necessary modules
 import random
 import tkinter as tk
-import tables, timer_
+import tab, tables, timer_
 from tkinter import ttk
 from tkinter import messagebox as msg
 # nounTab class
-class NounTab:
+class NounTab(tab.Tab):
     """the class for the noun's tab in the full program's notebook widget"""
-    def __init__(self, *, width: int, height: int, displayFont: tuple[str, int], bgCol: str, fgCol: str, selCol: str):
-        self.parsingCorrect, self.parsingIncorrect = 0, 0
-        self.typingCorrect, self.typingIncorrect = 0, 0
-        self.width, self.height = width, height
-        self.displayFont = displayFont
-        self.bgCol, self.fgCol = bgCol, fgCol
-        self.selCol = selCol
-        self.parsingTimer = timer_.Timer(dp=2)
-        self.typingTimer = timer_.Timer(dp=2)
-        self.lastTab = None
-        self.results = []
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.components = {
             "nouns": [v for v in tables.NOUNS.keys()],
             "cases": ["NOM", "VOC", "ACC", "GEN", "DAT", "ABL"],
@@ -29,9 +20,6 @@ class NounTab:
             "numbers" : self.components["numbers"]
         }
     # general funcs
-    def selected(self, varDict: dict) -> list[str]:
-        """returns all vars in the varDict which are selected"""
-        return [name for name, var in varDict.items() if var.get()]
     def possibleParsesOfNoun(self, form: str) -> list[str]:
         """reverse looks through tables.NOUNS and finds all parses for noun"""
         parses = []
@@ -51,11 +39,9 @@ class NounTab:
         nm = random.choice(numbers)
         ln = tables.NOUNS[nn][cs][nm]
         return ln, nn, cs, nm
-    def currentTab(self) -> tk.Frame:
-        return self.nounNotebook.nametowidget(self.nounNotebook.select())
     def onTabChanged(self, event) -> None:
         # get the current and previous tabs
-        current = self.currentTab()
+        current = self.currentTab(self.nounNotebook)
         previous = self.lastTab
         self.lastTab = current
         if current in [self.parsingFrame, self.typingFrame]:  # the user just entered parsing OR typing mode
@@ -67,43 +53,8 @@ class NounTab:
             self.nextParse()  # refreshes the noun to avoid cheating ig...?
         if current is self.typingFrame:  # the user just entered typing mode
             self.nextTyping()  # refresh
-    def displaySelector(self, *, frame: tk.Frame, thing: str, mode: str, widgetDict: dict, varOrDict, width: int, cols: int = 6, fs: int = 8, command=None, selectColour: str) -> None:
-        """displays either the cbs or rbs"""
-        for i, abbrev in enumerate(self.components[thing]):
-            row = i // cols
-            col = i % cols
-            match mode:
-                case "rb":
-                    widget = tk.Radiobutton(frame, text=abbrev, value=abbrev, variable=varOrDict, indicatoron=False, width=width, font=("Arial", fs), selectcolor=selectColour, command=(lambda a=abbrev: command(a)) if command else None)
-                case "cb":
-                    v = tk.BooleanVar()
-                    widget = tk.Checkbutton(frame, text=abbrev, variable=v, indicatoron=False, width=width, selectcolor=selectColour, command=command, font=("Arial", fs))
-                    varOrDict[abbrev] = v
-                    v.set(1)  # checks it
-                case _:
-                    raise ValueError(f"'{mode}' is not 'rb' or 'cb'")
-            widget.grid(row=row, column=col, padx=2, pady=2)
-            widgetDict[abbrev] = widget
-    def makeScrollableFrame(self, parent, *, bg) -> tuple[tk.Frame]:
-        """since frames cant use scrollwheels, it must be placed inside a canvas. returns "outer" (put this in the notebook), and "frame" (put widgets in here)"""
-        # create widgets
-        outer = tk.Frame(parent, bg=bg)  # stuff created in this method goes in here
-        canvas = tk.Canvas(outer, bg=bg, highlightthickness=0)
-        scrollbar = tk.Scrollbar(outer, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=scrollbar.set)  # bind scroller to the CANVAS
-        frame = tk.Frame(canvas, bg=bg)  # here we go
-        window = canvas.create_window((0, 0), window=frame, anchor="nw")
-        # no idea what this does!
-        frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-        canvas.bind("<Configure>", lambda e: canvas.itemconfigure(window, width=e.width))
-        def mousewheel(event): canvas.yview_scroll(-event.delta // 120, "units")  # function to scroll with mousewheel
-        frame.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", mousewheel))  # can only scroll with mousewheel if mouse is inside frame
-        frame.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))  # else, disable scrolling
-        canvas.pack(side="left", fill="both", expand=True)  # put it in!
-        scrollbar.pack(side="right", fill="y")  # put it in!
-        return outer, frame
     def enterPressed(self, _) -> None:
-        current = self.currentTab()
+        current = self.currentTab(self.nounNotebook)
         if current is self.parsingFrame:
             if self.parsingConfirmButton["state"] == "normal":
                 self.confirmParsing()
@@ -111,7 +62,7 @@ class NounTab:
             if self.typingConfirmButton["state"] == "normal":
                 self.confirmTyping()
     def spacePressed(self, _) -> None:
-        current = self.currentTab()
+        current = self.currentTab(self.nounNotebook)
         if current is self.parsingFrame:
             if self.parsingNextButton.winfo_ismapped():  # if the next button is shown
                 self.nextParse()
@@ -371,9 +322,9 @@ time taken: {timeTaken}
         self.reviewCaseUserval  .set("NOM")
         self.reviewNumberUserval.set("SG")
         # display the noun RBs
-        self.displaySelector(frame=self.reviewNounFrame,   mode="rb", thing="nouns",   widgetDict=self.reviewNounRBs,   varOrDict=self.reviewNounUserval,   width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.reviewCaseFrame,   mode="rb", thing="cases",   widgetDict=self.reviewCaseRBs,   varOrDict=self.reviewCaseUserval,   width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewNumberFrame, mode="rb", thing="numbers", widgetDict=self.reviewNumberRBs, varOrDict=self.reviewNumberUserval, width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewNounFrame,   mode="rb", options=self.components["nouns"],   widgetDict=self.reviewNounRBs,   varOrDict=self.reviewNounUserval,   width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol, cols=5)
+        self.displaySelector(frame=self.reviewCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.reviewCaseRBs,   varOrDict=self.reviewCaseUserval,   width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol)
+        self.displaySelector(frame=self.reviewNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.reviewNumberRBs, varOrDict=self.reviewNumberUserval, width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol)
         # add the frame to the parent notebook
         parentNotebook.add(self.reviewFrame, text="REVIEW")
     def buildSetupSubtab(self, parentNotebook: ttk.Notebook) -> None:
@@ -397,9 +348,9 @@ time taken: {timeTaken}
         self.setupCaseFrame.grid(row=2, column=1, sticky="ew")
         self.setupNumberFrame.grid(row=3, column=1, sticky="ew")
         # create the display the setup CBs
-        self.displaySelector(frame=self.setupNounFrame,   mode="cb", thing="nouns",  widgetDict=self.setupNounCBs,   varOrDict=self.setupNounUservals,   width=6, command=self.updateAllowance, selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.setupCaseFrame,   mode="cb", thing="cases", widgetDict=self.setupCaseCBs,   varOrDict=self.setupCaseUservals,   width=6, command=self.updateAllowance, selectColour=self.selCol)
-        self.displaySelector(frame=self.setupNumberFrame, mode="cb", thing="numbers", widgetDict=self.setupNumberCBs, varOrDict=self.setupNumberUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
+        self.displaySelector(frame=self.setupNounFrame,   mode="cb", options=self.components["nouns"],  widgetDict=self.setupNounCBs,   varOrDict=self.setupNounUservals,   width=6, command=self.updateAllowance, selectColour=self.selCol, cols=5)
+        self.displaySelector(frame=self.setupCaseFrame,   mode="cb", options=self.components["cases"], widgetDict=self.setupCaseCBs,   varOrDict=self.setupCaseUservals,   width=6, command=self.updateAllowance, selectColour=self.selCol)
+        self.displaySelector(frame=self.setupNumberFrame, mode="cb", options=self.components["numbers"], widgetDict=self.setupNumberCBs, varOrDict=self.setupNumberUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
         # other
         self.setupButtonsFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
         self.setupButtonsFrame.grid(row=5, column=1, sticky="ew")
@@ -435,8 +386,8 @@ time taken: {timeTaken}
         self.parsingCaseRBs,   self.parsingCaseUserval   = {}, tk.StringVar()
         self.parsingNumberRBs, self.parsingNumberUserval = {}, tk.StringVar()
         # display the noun RBs
-        self.displaySelector(frame=self.parsingCaseFrame,   mode="rb", thing="cases",   widgetDict=self.parsingCaseRBs,   varOrDict=self.parsingCaseUserval,   width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingNumberFrame, mode="rb", thing="numbers", widgetDict=self.parsingNumberRBs, varOrDict=self.parsingNumberUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.parsingCaseRBs,   varOrDict=self.parsingCaseUserval,   width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        self.displaySelector(frame=self.parsingNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.parsingNumberRBs, varOrDict=self.parsingNumberUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
         self.parsingConfirmButton = tk.Button(self.parsingFrame, text="CHECK", font=("Arial bold", 8), state="disabled", command=self.confirmParsing)
         self.parsingConfirmButton.grid(row=999, column=1, sticky="ew")
         self.parsingNextButton = tk.Button(self.parsingFrame, text="NEXT", font=("Arial", 10), width=6, command=self.nextParse)
