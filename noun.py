@@ -305,26 +305,10 @@ time taken: {timeTaken}
         self.reviewDisplayor.grid(row=0, column=0, columnspan=999)
         # create spacer
         tk.Label(self.reviewFrame, bg=self.bgCol, width=6).grid(row=1, column=0)
-        # create the frames
-        self.reviewNounFrame   = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewCaseFrame   = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewNumberFrame = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        # grid the frames
-        self.reviewNounFrame  .grid(row=1, column=1, sticky="ew")
-        self.reviewCaseFrame  .grid(row=2, column=1, sticky="ew")
-        self.reviewNumberFrame.grid(row=3, column=1, sticky="ew")
-        # create the vars
-        self.reviewNounRBs,   self.reviewNounUserval   = {}, tk.StringVar()
-        self.reviewCaseRBs,   self.reviewCaseUserval   = {}, tk.StringVar()
-        self.reviewNumberRBs, self.reviewNumberUserval = {}, tk.StringVar()
-        # select one thing in each frame
-        self.reviewNounUserval  .set("PUELLA")
-        self.reviewCaseUserval  .set("NOM")
-        self.reviewNumberUserval.set("SG")
-        # display the noun RBs
-        self.displaySelector(frame=self.reviewNounFrame,   mode="rb", options=self.components["nouns"],   widgetDict=self.reviewNounRBs,   varOrDict=self.reviewNounUserval,   width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.reviewCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.reviewCaseRBs,   varOrDict=self.reviewCaseUserval,   width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.reviewNumberRBs, varOrDict=self.reviewNumberUserval, width=6, command=self.renderReviewLatinNoun,    selectColour=self.selCol)
+        # create the widgets
+        self.reviewNounFrame,   self.reviewNounRBs,   self.reviewNounUserval   = self.makeSelectors(mode="rb", thing="nouns",   parentFrame=self.reviewFrame, coords=(1, 1), command=self.renderReviewLatinNoun, setting="PUELLA", cols=5)
+        self.reviewCaseFrame,   self.reviewCaseRBs,   self.reviewCaseUserval   = self.makeSelectors(mode="rb", thing="cases",   parentFrame=self.reviewFrame, coords=(2, 1), command=self.renderReviewLatinNoun, setting="NOM")
+        self.reviewNumberFrame, self.reviewNumberRBs, self.reviewNumberUserval = self.makeSelectors(mode="rb", thing="numbers", parentFrame=self.reviewFrame, coords=(3, 1), command=self.renderReviewLatinNoun, setting="SG")
         # add the frame to the parent notebook
         parentNotebook.add(self.reviewFrame, text="REVIEW")
     def buildSetupSubtab(self, parentNotebook: ttk.Notebook) -> None:
@@ -335,22 +319,10 @@ time taken: {timeTaken}
         tk.Label(self.setupFrame, text="choose options:", bg=self.bgCol, fg=self.fgCol, font=("Arial", 25)).grid(row=0, column=0, columnspan=999)
         # create a spacer to avoid leftjustification
         tk.Label(self.setupFrame, bg=self.bgCol, width=6).grid(row=1, column=0)
-        # create the noun setup frame for each component
-        self.setupNounFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        self.setupCaseFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        self.setupNumberFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        # create the dicts
-        self.setupNounCBs,  self.setupNounUservals  = {}, {}
-        self.setupCaseCBs, self.setupCaseUservals = {}, {}
-        self.setupNumberCBs, self.setupNumberUservals = {}, {}
-        # grid the frames inside
-        self.setupNounFrame .grid(row=1, column=1, sticky="ew")
-        self.setupCaseFrame.grid(row=2, column=1, sticky="ew")
-        self.setupNumberFrame.grid(row=3, column=1, sticky="ew")
-        # create the display the setup CBs
-        self.displaySelector(frame=self.setupNounFrame,   mode="cb", options=self.components["nouns"],  widgetDict=self.setupNounCBs,   varOrDict=self.setupNounUservals,   width=6, command=self.updateAllowance, selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.setupCaseFrame,   mode="cb", options=self.components["cases"], widgetDict=self.setupCaseCBs,   varOrDict=self.setupCaseUservals,   width=6, command=self.updateAllowance, selectColour=self.selCol)
-        self.displaySelector(frame=self.setupNumberFrame, mode="cb", options=self.components["numbers"], widgetDict=self.setupNumberCBs, varOrDict=self.setupNumberUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
+        # create widgets
+        self.setupNounFrame,   self.setupNounRBs,   self.setupNounUservals   = self.makeSelectors(mode="cb", thing="nouns",   parentFrame=self.setupFrame, coords=(1, 1), command=self.updateAllowance, cols=5)
+        self.setupCaseFrame,   self.setupCaseRBs,   self.setupCaseUservals   = self.makeSelectors(mode="cb", thing="cases",   parentFrame=self.setupFrame, coords=(2, 1), command=self.updateAllowance)
+        self.setupNumberFrame, self.setupNumberRBs, self.setupNumberUservals = self.makeSelectors(mode="cb", thing="numbers", parentFrame=self.setupFrame, coords=(3, 1), command=self.updateAllowance)
         # other
         self.setupButtonsFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
         self.setupButtonsFrame.grid(row=5, column=1, sticky="ew")
@@ -376,18 +348,10 @@ time taken: {timeTaken}
         self.parsingIncorrectLabel.place(relx=1, x=-10, y=10, anchor="ne")
         # create spacer
         tk.Label(self.parsingFrame, width=6, bg=self.bgCol).grid(row=1, column=0)
-        # create the frames for each component
-        self.parsingCaseFrame       = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
-        self.parsingNumberFrame     = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
-        # grid them in
-        self.parsingCaseFrame  .grid(row=1, column=1, sticky="ew")
-        self.parsingNumberFrame.grid(row=2, column=1, sticky="ew")
-        # create the dicts and string vars to hold the data
-        self.parsingCaseRBs,   self.parsingCaseUserval   = {}, tk.StringVar()
-        self.parsingNumberRBs, self.parsingNumberUserval = {}, tk.StringVar()
-        # display the noun RBs
-        self.displaySelector(frame=self.parsingCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.parsingCaseRBs,   varOrDict=self.parsingCaseUserval,   width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.parsingNumberRBs, varOrDict=self.parsingNumberUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        # create widgets
+        self.parsingCaseFrame,   self.parsingCaseRBs,   self.parsingCaseUserval   = self.makeSelectors(mode="rb", thing="cases",   parentFrame=self.parsingFrame, coords=(1, 1), command=self.updateParsingConfirmButton)
+        self.parsingNumberFrame, self.parsingNumberRBs, self.parsingNumberUserval = self.makeSelectors(mode="rb", thing="numbers", parentFrame=self.parsingFrame, coords=(2, 1), command=self.updateParsingConfirmButton)
+        # other
         self.parsingConfirmButton = tk.Button(self.parsingFrame, text="CHECK", font=("Arial bold", 8), state="disabled", command=self.confirmParsing)
         self.parsingConfirmButton.grid(row=999, column=1, sticky="ew")
         self.parsingNextButton = tk.Button(self.parsingFrame, text="NEXT", font=("Arial", 10), width=6, command=self.nextParse)

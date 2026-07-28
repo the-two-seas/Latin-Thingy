@@ -14,6 +14,7 @@ class Tab:
         self.displayFont = displayFont
         self.bgCol, self.fgCol = bgCol, fgCol
         self.selCol = selCol
+        self.components = {}  # this will be overridden!
         self.parsingTimer = timer_.Timer(dp=2)
         self.typingTimer = timer_.Timer(dp=2)
         self.lastTab = None
@@ -58,9 +59,15 @@ class Tab:
         canvas.pack(side="left", fill="both", expand=True)  # put it in!
         scrollbar.pack(side="right", fill="y")  # put it in!
         return outer, frame
-    def enterPressed(self, _) -> None:
-        self.confirm()
-    def spacePressed(self, _) -> None:
-        self.next() 
-    def confirm(self): pass
-    def next(self): pass
+    def makeSelectors(self, *, mode: str, thing: str, parentFrame: tk.Frame, coords: tuple[int], setting: str = "", cols: int = 6, command) -> tuple:
+        """creates the widgets and RETURNS THEM!!! (frame, dict and uservals)"""
+        row, col = coords
+        frame = tk.Frame(parentFrame, width=self.width, bg=self.bgCol)
+        frame.grid(row=row, column=col, sticky="ew")
+        assert callable(command), "not a function"
+        btnDict = {}
+        btnUserval = tk.StringVar(value=setting) if mode == "rb" else {}
+        self.displaySelector(frame=frame, mode=mode, options=self.components[thing], widgetDict=btnDict, varOrDict=btnUserval, width=6, cols=cols, command=command, selectColour=self.selCol)
+        return frame, btnDict, btnUserval
+
+

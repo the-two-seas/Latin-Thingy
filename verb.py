@@ -475,54 +475,19 @@ time taken: {timeTaken}
         self.reviewDisplayor.grid(row=0, column=0, columnspan=999)
         # create spacer
         tk.Label(self.reviewFrame, bg=self.bgCol, width=6).grid(row=1, column=0)
-        # create the frames
-        self.reviewVerbFrame       = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewTenseFrame      = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewVoiceFrame      = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewMoodFrame       = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewPersonFrame     = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
+        # create the ptcp frame
         self.reviewParticipleFrame = tk.Frame(self.reviewFrame, width=self.width, bg=self.bgCol)
-        self.reviewGenderFrame     = tk.Frame(self.reviewParticipleFrame, width=self.width, bg=self.bgCol)
-        self.reviewCaseFrame       = tk.Frame(self.reviewParticipleFrame, width=self.width, bg=self.bgCol)
-        self.reviewNumberFrame     = tk.Frame(self.reviewParticipleFrame, width=self.width, bg=self.bgCol)
         self.reviewParticipleFrame.grid(row=5, column=1, sticky="ew")
         self.reviewParticipleFrame.grid_remove()  # this is to ensure that the ptcp frame knows where it is before being shown for the first time
-        # grid the frames
-        self.reviewVerbFrame  .grid(row=1, column=1, sticky="ew")
-        self.reviewTenseFrame .grid(row=2, column=1, sticky="ew")
-        self.reviewVoiceFrame .grid(row=3, column=1, sticky="ew")
-        self.reviewMoodFrame  .grid(row=4, column=1, sticky="ew")
-        self.reviewPersonFrame.grid(row=5, column=1, sticky="ew")
-        self.reviewGenderFrame.grid(row=0, column=1, sticky="ew")  # PTCP frame, :. row 0
-        self.reviewCaseFrame  .grid(row=1, column=1, sticky="ew")
-        self.reviewNumberFrame.grid(row=2, column=1, sticky="ew")
-        # create the vars
-        self.reviewVerbRBs,   self.reviewVerbUserval   = {}, tk.StringVar()
-        self.reviewTenseRBs,  self.reviewTenseUserval  = {}, tk.StringVar()
-        self.reviewVoiceRBs,  self.reviewVoiceUserval  = {}, tk.StringVar()
-        self.reviewMoodRBs,   self.reviewMoodUserval   = {}, tk.StringVar()
-        self.reviewPersonRBs, self.reviewPersonUserval = {}, tk.StringVar()
-        self.reviewGenderRBs, self.reviewGenderUserval = {}, tk.StringVar()
-        self.reviewCaseRBs,   self.reviewCaseUserval   = {}, tk.StringVar()
-        self.reviewNumberRBs, self.reviewNumberUserval = {}, tk.StringVar()
-        # select one thing in each frame
-        self.reviewVerbUserval  .set("AMO")
-        self.reviewTenseUserval .set("PRES")
-        self.reviewVoiceUserval .set("ACT")
-        self.reviewMoodUserval  .set("INDC")
-        self.reviewPersonUserval.set("1S")
-        self.reviewGenderUserval.set("MASC")
-        self.reviewCaseUserval  .set("NOM")
-        self.reviewNumberUserval.set("SG")
-        # display the verb RBs
-        self.displaySelector(frame=self.reviewVerbFrame,   mode="rb", options=self.components["verbs"],   widgetDict=self.reviewVerbRBs,   varOrDict=self.reviewVerbUserval,   width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.reviewTenseFrame,  mode="rb", options=self.components["tenses"],  widgetDict=self.reviewTenseRBs,  varOrDict=self.reviewTenseUserval,  width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewVoiceFrame,  mode="rb", options=self.components["voices"],  widgetDict=self.reviewVoiceRBs,  varOrDict=self.reviewVoiceUserval,  width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewMoodFrame,   mode="rb", options=self.components["moods"],   widgetDict=self.reviewMoodRBs,   varOrDict=self.reviewMoodUserval,   width=6, command=self.displayReviewBeyondMoods, selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewPersonFrame, mode="rb", options=self.components["people"],  widgetDict=self.reviewPersonRBs, varOrDict=self.reviewPersonUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewGenderFrame, mode="rb", options=self.components["genders"], widgetDict=self.reviewGenderRBs, varOrDict=self.reviewGenderUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.reviewCaseRBs,   varOrDict=self.reviewCaseUserval,   width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
-        self.displaySelector(frame=self.reviewNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.reviewNumberRBs, varOrDict=self.reviewNumberUserval, width=6, command=self.renderReviewLatinVerb,    selectColour=self.selCol)
+        # other frames and things...
+        self.reviewVerbFrame,  self.reviewVerbRBs,    self.reviewVerbUserval   = self.makeSelectors(mode="rb", thing="verbs",   parentFrame=self.reviewFrame, coords=(1, 1), command=self.renderReviewLatinVerb,    setting="AMO", cols=5)
+        self.reviewTenseFrame,  self.reviewTenseRBs,  self.reviewTenseUserval  = self.makeSelectors(mode="rb", thing="tenses",  parentFrame=self.reviewFrame, coords=(2, 1), command=self.renderReviewLatinVerb,    setting="PRES")
+        self.reviewVoiceFrame,  self.reviewVoiceRBs,  self.reviewVoiceUserval  = self.makeSelectors(mode="rb", thing="voices",  parentFrame=self.reviewFrame, coords=(3, 1), command=self.renderReviewLatinVerb,    setting="ACT")
+        self.reviewMoodFrame,   self.reviewMoodRBs,   self.reviewMoodUserval   = self.makeSelectors(mode="rb", thing="moods",   parentFrame=self.reviewFrame, coords=(4, 1), command=self.displayReviewBeyondMoods, setting="INDC")
+        self.reviewPersonFrame, self.reviewPersonRBs, self.reviewPersonUserval = self.makeSelectors(mode="rb", thing="people",  parentFrame=self.reviewFrame, coords=(5, 1), command=self.renderReviewLatinVerb,    setting="1S")
+        self.reviewGenderFrame, self.reviewGenderRBs, self.reviewGenderUserval = self.makeSelectors(mode="rb", thing="genders", parentFrame=self.reviewParticipleFrame, coords=(1, 1), command=self.renderReviewLatinVerb, setting="MASC")
+        self.reviewCaseFrame,   self.reviewCaseRBs,   self.reviewCaseUserval   = self.makeSelectors(mode="rb", thing="cases",   parentFrame=self.reviewParticipleFrame, coords=(2, 1), command=self.renderReviewLatinVerb, setting="NOM")
+        self.reviewNumberFrame, self.reviewNumberRBs, self.reviewNumberUserval = self.makeSelectors(mode="rb", thing="numbers", parentFrame=self.reviewParticipleFrame, coords=(3, 1), command=self.renderReviewLatinVerb, setting="SG")
         # add the frame to the parent notebook
         parentNotebook.add(self.reviewFrame, text="REVIEW")
     def buildSetupSubtab(self, parentNotebook: ttk.Notebook) -> None:
@@ -533,26 +498,11 @@ time taken: {timeTaken}
         tk.Label(self.setupFrame, text="choose options:", bg=self.bgCol, fg=self.fgCol, font=("Arial", 25)).grid(row=0, column=0, columnspan=999)
         # create a spacer to avoid leftjustification
         tk.Label(self.setupFrame, bg=self.bgCol, width=6).grid(row=1, column=0)
-        # create the verb setup frame for each component
-        self.setupVerbFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        self.setupTenseFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        self.setupVoiceFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        self.setupMoodFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
-        # create the dicts
-        self.setupVerbCBs,  self.setupVerbUservals  = {}, {}
-        self.setupTenseCBs, self.setupTenseUservals = {}, {}
-        self.setupVoiceCBs, self.setupVoiceUservals = {}, {}
-        self.setupMoodCBs,  self.setupMoodUservals  = {}, {}
-        # grid the frames inside
-        self.setupVerbFrame .grid(row=1, column=1, sticky="ew")
-        self.setupTenseFrame.grid(row=2, column=1, sticky="ew")
-        self.setupVoiceFrame.grid(row=3, column=1, sticky="ew")
-        self.setupMoodFrame .grid(row=4, column=1, sticky="ew")
-        # create the display the setup CBs
-        self.displaySelector(frame=self.setupVerbFrame,  mode="cb", options=self.components["verbs"],  widgetDict=self.setupVerbCBs,  varOrDict=self.setupVerbUservals,  width=6, command=self.updateAllowance, selectColour=self.selCol, cols=5)
-        self.displaySelector(frame=self.setupTenseFrame, mode="cb", options=self.components["tenses"], widgetDict=self.setupTenseCBs, varOrDict=self.setupTenseUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
-        self.displaySelector(frame=self.setupVoiceFrame, mode="cb", options=self.components["voices"], widgetDict=self.setupVoiceCBs, varOrDict=self.setupVoiceUservals, width=6, command=self.updateAllowance, selectColour=self.selCol)
-        self.displaySelector(frame=self.setupMoodFrame,  mode="cb", options=self.components["moods"],  widgetDict=self.setupMoodCBs,  varOrDict=self.setupMoodUservals,  width=6, command=self.updateAllowance, selectColour=self.selCol)
+        # create the widgets
+        self.setupVerbFrame,  self.setupVerbCBs,  self.setupVerbUservals  = self.makeSelectors(mode="cb", thing="verbs",  parentFrame=self.setupFrame, coords=(1, 1), command=self.updateAllowance, cols=5)
+        self.setupTenseFrame, self.setupTenseCBs, self.setupTenseUservals = self.makeSelectors(mode="cb", thing="tenses", parentFrame=self.setupFrame, coords=(2, 1), command=self.updateAllowance)
+        self.setupVoiceFrame, self.setupVoiceCBs, self.setupVoiceUservals = self.makeSelectors(mode="cb", thing="voices", parentFrame=self.setupFrame, coords=(3, 1), command=self.updateAllowance)
+        self.setupMoodFrame,  self.setupMoodCBs,  self.setupMoodUservals  = self.makeSelectors(mode="cb", thing="moods",  parentFrame=self.setupFrame, coords=(4, 1), command=self.updateAllowance)
         # other
         self.setupButtonsFrame = tk.Frame(self.setupFrame, width=self.width, bg=self.bgCol)
         self.setupButtonsFrame.grid(row=5, column=1, sticky="ew")
@@ -578,41 +528,19 @@ time taken: {timeTaken}
         self.parsingIncorrectLabel.place(relx=1, x=-10, y=10, anchor="ne")
         # create spacer
         tk.Label(self.parsingFrame, width=6, bg=self.bgCol).grid(row=1, column=0)
-        # create the frames for each component
-        self.parsingTenseFrame      = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
-        self.parsingVoiceFrame      = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
-        self.parsingMoodFrame       = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
-        self.parsingPersonFrame     = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
+        # create the ptcp frame
         self.parsingParticipleFrame = tk.Frame(self.parsingFrame, width=self.width, bg=self.bgCol)
-        self.parsingGenderFrame     = tk.Frame(self.parsingParticipleFrame, width=self.width, bg=self.bgCol)
-        self.parsingCaseFrame       = tk.Frame(self.parsingParticipleFrame, width=self.width, bg=self.bgCol)
-        self.parsingNumberFrame     = tk.Frame(self.parsingParticipleFrame, width=self.width, bg=self.bgCol)
         self.parsingParticipleFrame.grid(row=5, column=1, sticky="ew")
         self.parsingParticipleFrame.grid_remove()  # this is to ensure that the ptcp frame knows where it is before being shown for the first time
-        # grid them in
-        self.parsingTenseFrame .grid(row=1, column=1, sticky="ew")
-        self.parsingVoiceFrame .grid(row=2, column=1, sticky="ew")
-        self.parsingMoodFrame  .grid(row=3, column=1, sticky="ew")
-        self.parsingPersonFrame.grid(row=4, column=1, sticky="ew")
-        self.parsingGenderFrame.grid(row=0, column=1, sticky="ew")  # PTCP frame, :. 0-1-2 not 4-5-6
-        self.parsingCaseFrame  .grid(row=1, column=1, sticky="ew")
-        self.parsingNumberFrame.grid(row=2, column=1, sticky="ew")
-        # create the dicts and string vars to hold the data
-        self.parsingTenseRBs,  self.parsingTenseUserval  = {}, tk.StringVar()
-        self.parsingVoiceRBs,  self.parsingVoiceUserval  = {}, tk.StringVar()
-        self.parsingMoodRBs,   self.parsingMoodUserval   = {}, tk.StringVar()
-        self.parsingPersonRBs, self.parsingPersonUserval = {}, tk.StringVar()
-        self.parsingGenderRBs, self.parsingGenderUserval = {}, tk.StringVar()
-        self.parsingCaseRBs,   self.parsingCaseUserval   = {}, tk.StringVar()
-        self.parsingNumberRBs, self.parsingNumberUserval = {}, tk.StringVar()
-        # display the verb RBs
-        self.displaySelector(frame=self.parsingTenseFrame,  mode="rb", options=self.components["tenses"],  widgetDict=self.parsingTenseRBs,  varOrDict=self.parsingTenseUserval,  width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingVoiceFrame,  mode="rb", options=self.components["voices"],  widgetDict=self.parsingVoiceRBs,  varOrDict=self.parsingVoiceUserval,  width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingMoodFrame,   mode="rb", options=self.components["moods"],   widgetDict=self.parsingMoodRBs,   varOrDict=self.parsingMoodUserval,   width=6, command=self.displayParsingBeyondMoods,  selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingPersonFrame, mode="rb", options=self.components["people"],  widgetDict=self.parsingPersonRBs, varOrDict=self.parsingPersonUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingGenderFrame, mode="rb", options=self.components["genders"], widgetDict=self.parsingGenderRBs, varOrDict=self.parsingGenderUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingCaseFrame,   mode="rb", options=self.components["cases"],   widgetDict=self.parsingCaseRBs,   varOrDict=self.parsingCaseUserval,   width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
-        self.displaySelector(frame=self.parsingNumberFrame, mode="rb", options=self.components["numbers"], widgetDict=self.parsingNumberRBs, varOrDict=self.parsingNumberUserval, width=6, command=self.updateParsingConfirmButton, selectColour=self.selCol)
+        # create the other widgets
+        self.parsingTenseFrame,  self.parsingTenseRBs,  self.parsingTenseUserval  = self.makeSelectors(mode="rb", thing="tenses",  parentFrame=self.parsingFrame, coords=(1, 1), command=self.updateParsingConfirmButton)
+        self.parsingVoiceFrame,  self.parsingVoiceRBs,  self.parsingVoiceUserval  = self.makeSelectors(mode="rb", thing="voices",  parentFrame=self.parsingFrame, coords=(2, 1), command=self.updateParsingConfirmButton)
+        self.parsingMoodFrame,   self.parsingMoodRBs,   self.parsingMoodUserval   = self.makeSelectors(mode="rb", thing="moods",   parentFrame=self.parsingFrame, coords=(3, 1), command=self.displayParsingBeyondMoods)
+        self.parsingPersonFrame, self.parsingPersonRBs, self.parsingPersonUserval = self.makeSelectors(mode="rb", thing="people",  parentFrame=self.parsingFrame, coords=(4, 1), command=self.updateParsingConfirmButton)
+        self.parsingGenderFrame, self.parsingGenderRBs, self.parsingGenderUserval = self.makeSelectors(mode="rb", thing="genders", parentFrame=self.parsingParticipleFrame, coords=(0, 1), command=self.updateParsingConfirmButton)
+        self.parsingCaseFrame,   self.parsingCaseRBs,   self.parsingCaseUserval   = self.makeSelectors(mode="rb", thing="cases",   parentFrame=self.parsingParticipleFrame, coords=(1, 1), command=self.updateParsingConfirmButton)
+        self.parsingNumberFrame, self.parsingNumberRBs, self.parsingNumberUserval = self.makeSelectors(mode="rb", thing="numbers", parentFrame=self.parsingParticipleFrame, coords=(2, 1), command=self.updateParsingConfirmButton)
+        # other stuff
         self.parsingConfirmButton = tk.Button(self.parsingFrame, text="CHECK", font=("Arial bold", 8), state="disabled", command=self.confirmParsing)
         self.parsingConfirmButton.grid(row=999, column=1, sticky="ew")
         self.parsingNextButton = tk.Button(self.parsingFrame, text="NEXT", font=("Arial", 10), width=6, command=self.nextParse)
