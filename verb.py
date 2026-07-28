@@ -82,7 +82,7 @@ class VerbTab(tab.Tab):
             cs = random.choice(self.components["cases"])  #      \
             nm = random.choice(self.components["numbers"])  #     \
             if self.evenlyChoose:  # <----------------------------'
-                _, tn, vo, mo = random.choice(self.validForms)  # fix this!
+                _, tn, vo, mo = random.choice(self.validForms)
                 validAndAllowed = [
                     (verb, tense, voice, mood)
                     for verb, tense, voice, mood in self.validForms
@@ -203,8 +203,6 @@ class VerbTab(tab.Tab):
             self.parsingConfirmButton.config(state="disabled")
             self.parsingLVUninflected = None
             return
-        else:
-            self.renderNewLatinVerb()
     def selectAllSetupCBs(self) -> None:
         for CBs in [self.setupTenseUservals, self.setupVoiceUservals, self.setupMoodUservals, self.setupVerbUservals]:
             for _, CB in CBs.items():
