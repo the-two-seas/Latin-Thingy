@@ -201,7 +201,7 @@ class NounTab(tab.Tab):
         self.typingUserval.set("")  # empty the box
         self.typingEntry.config(state="disabled")  # disable the textbox
         # CHECK IF IT IS (IN)CORRECT
-        self.typingStatus = (self.typingUserInput == self.typingLatinNoun)
+        self.typingStatus = (self.typingUserInput == tables.unmacron(self.typingLatinNoun))
         if self.typingStatus:  # correct
             self.typingCorrect += 1
         else:

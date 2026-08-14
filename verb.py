@@ -37,9 +37,9 @@ class VerbTab(tab.Tab):
         ]
         self.allowed = {
             "verbs" : list(tables.VERBS.keys()),
-            "tenses": list(tables.VERBS["AMO"].keys()),
-            "voices": list(tables.VERBS["AMO"]["PRES"].keys()),
-            "moods" : list(tables.VERBS["AMO"]["PRES"]["ACT"].keys())
+            "tenses": list(tables.VERBS["AMŌ"].keys()),
+            "voices": list(tables.VERBS["AMŌ"]["PRES"].keys()),
+            "moods" : list(tables.VERBS["AMŌ"]["PRES"]["ACT"].keys())
         }
     # general funcs
     def verbFormExists(self, verb: str, tense: str, voice: str, mood: str) -> bool:
@@ -170,10 +170,12 @@ class VerbTab(tab.Tab):
                 number = self.reviewNumberUserval.get()
                 self.reviewLatinVerb = tables.VERBS[verb][tense][voice][mood][gender][case][number]
         # display
+        self.reviewDisplayor.config(text=str(self.reviewLatinVerb))
+        '''
         if self.reviewLatinVerb is not None:
             self.reviewDisplayor.config(text=self.reviewLatinVerb)
         else:
-            self.reviewDisplayor.config(text="N/A")
+            self.reviewDisplayor.config(text="N/A")'''
     # functions for SETUP
     def doesValidVTVMComboExist(self) -> bool:
         combos = []
@@ -201,7 +203,7 @@ class VerbTab(tab.Tab):
         if not all(self.allowed.values()):
             self.parsingDisplayor.config(text="INSUFFICIENCY")
             self.parsingConfirmButton.config(state="disabled")
-            self.parsingLVUninflected = None
+            self.parsingLemma = None
             return
     def selectAllSetupCBs(self) -> None:
         for CBs in [self.setupTenseUservals, self.setupVoiceUservals, self.setupMoodUservals, self.setupVerbUservals]:
@@ -220,7 +222,7 @@ class VerbTab(tab.Tab):
                 rb.config(state=state)
     def whatDidTheUserParse(self) -> dict[str, str]:
         """empty selections are shown by the EMPTY STRING "" !!!!!!!!!"""
-        vb = self.parsingLVUninflected
+        vb = self.parsingLemma
         tn = self.parsingTenseUserval.get()
         vo = self.parsingVoiceUserval.get()
         mo = self.parsingMoodUserval.get()
@@ -253,7 +255,7 @@ class VerbTab(tab.Tab):
     def renderNewLatinVerb(self) -> None:
         """user's time to guess STARTS HERE!!!!!"""
         # get the verb
-        self.parsingLatinVerb, self.parsingLVUninflected, *_ = self.getLatinVerb(
+        self.parsingLatinVerb, self.parsingLemma, *_ = self.getLatinVerb(
             verbs=self.allowed["verbs"], tenses=self.allowed["tenses"], voices=self.allowed["voices"], moods=self.allowed["moods"]
         )
         self.parsingDisplayor.config(text=self.parsingLatinVerb)  # display the verb      
@@ -278,7 +280,7 @@ class VerbTab(tab.Tab):
         self.updateParsingConfirmButton("???")
     def confirmParsing(self) -> None:
         """checks if the deatils entered by the user are parsingCorrect"""
-        if self.parsingLVUninflected is None: msg.showerror("gavin", "self.parsingLVUninflected is None"); return
+        if self.parsingLemma is None: msg.showerror("gavin", "self.parsingLemma is None"); return
         # get all user inputs
         userVerb, userTense, userVoice, userMood, userPerson, userGender, userCase, userNumber = list(self.whatDidTheUserParse().values())
         # timer stuff
@@ -303,7 +305,7 @@ class VerbTab(tab.Tab):
             self.parsingIncorrect += 1
             msg.showinfo(
                 title="you could have had these instead:",
-                message=f"possible parses of {self.parsingLatinVerb} ({self.parsingLVUninflected}):\n{',\n'.join(self.possibleParsesList)}.\nyou parsed {self.userLatinVerb}"
+                message=f"possible parses of {self.parsingLatinVerb} ({self.parsingLemma}):\n{',\n'.join(self.possibleParsesList)}.\nyou parsed {self.userLatinVerb}"
                 )
         # general
         self.updateParsingConfirmButton("N2")
@@ -357,7 +359,7 @@ class VerbTab(tab.Tab):
         self.typingUserval.set("")  # empty the box
         self.typingEntry.config(state="disabled")  # disable the textbox
         # CHECK IF IT IS (IN)CORRECT
-        self.typingStatus = self.typingUserInput == self.typingLatinVerb
+        self.typingStatus = self.typingUserInput == tables.unmacron(self.typingLatinVerb)
         if self.typingStatus:  # correct
             self.typingCorrect += 1
         else:
@@ -373,7 +375,7 @@ class VerbTab(tab.Tab):
         self.typingNextButton.place(x=self.width//2, y=self.height-100, anchor="center")
     def nextTyping(self) -> None:
         # get the data
-        self.typingLatinVerb, self.typingVerbUninflected, self.typingTense, self.typingVoice, self.typingMood, self.typingPerson, self.typingGender, self.typingCase, self.typingNumber = self.getLatinVerb(
+        self.typingLatinVerb, self.typingLemma, self.typingTense, self.typingVoice, self.typingMood, self.typingPerson, self.typingGender, self.typingCase, self.typingNumber = self.getLatinVerb(
             verbs=self.allowed["verbs"], tenses=self.allowed["tenses"], voices=self.allowed["voices"], moods=self.allowed["moods"]
         )
         # form the message
@@ -389,7 +391,7 @@ class VerbTab(tab.Tab):
                     message = " ".join([x for x in ("GERUNDIVE", self.typingGender, self.typingCase, self.typingNumber) if x])
             case _:
                 raise ValueError("typing mood is not in INDC SUBJ IMPT INFN PTCP")
-        message = f"type this form of {self.typingVerbUninflected}:\n{message}"
+        message = f"type this form of {self.typingLemma}:\n{message}"
         self.typingPromptLabel.config(text=message)  # display
         self.typingTimer.start()
         self.typingNextButton.place_forget()  # hide the next button
@@ -469,7 +471,7 @@ time taken: {timeTaken}
         # create the frame
         self.reviewFrame = tk.Frame(parentNotebook, bg=self.bgCol, width=self.width, height=self.height)
         # create displayor
-        self.reviewDisplayor = tk.Label(self.reviewFrame, text="amo", font=self.displayFont, bg=self.bgCol, fg=self.fgCol)
+        self.reviewDisplayor = tk.Label(self.reviewFrame, text="amō", font=self.displayFont, bg=self.bgCol, fg=self.fgCol)
         self.reviewDisplayor.grid(row=0, column=0, columnspan=999)
         # create spacer
         tk.Label(self.reviewFrame, bg=self.bgCol, width=6).grid(row=1, column=0)
@@ -478,7 +480,7 @@ time taken: {timeTaken}
         self.reviewParticipleFrame.grid(row=5, column=1, sticky="ew")
         self.reviewParticipleFrame.grid_remove()  # this is to ensure that the ptcp frame knows where it is before being shown for the first time
         # other frames and things...
-        self.reviewVerbFrame,  self.reviewVerbRBs,    self.reviewVerbUserval   = self.makeSelectors(mode="rb", thing="verbs",   parentFrame=self.reviewFrame, coords=(1, 1), command=self.renderReviewLatinVerb,    setting="AMO", cols=5)
+        self.reviewVerbFrame,  self.reviewVerbRBs,    self.reviewVerbUserval   = self.makeSelectors(mode="rb", thing="verbs",   parentFrame=self.reviewFrame, coords=(1, 1), command=self.renderReviewLatinVerb,    setting="AMŌ", cols=5)
         self.reviewTenseFrame,  self.reviewTenseRBs,  self.reviewTenseUserval  = self.makeSelectors(mode="rb", thing="tenses",  parentFrame=self.reviewFrame, coords=(2, 1), command=self.renderReviewLatinVerb,    setting="PRES")
         self.reviewVoiceFrame,  self.reviewVoiceRBs,  self.reviewVoiceUserval  = self.makeSelectors(mode="rb", thing="voices",  parentFrame=self.reviewFrame, coords=(3, 1), command=self.renderReviewLatinVerb,    setting="ACT")
         self.reviewMoodFrame,   self.reviewMoodRBs,   self.reviewMoodUserval   = self.makeSelectors(mode="rb", thing="moods",   parentFrame=self.reviewFrame, coords=(4, 1), command=self.displayReviewBeyondMoods, setting="INDC")

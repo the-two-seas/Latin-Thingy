@@ -69,5 +69,3 @@ class Tab:
         btnUserval = tk.StringVar(value=setting) if mode == "rb" else {}
         self.displaySelector(frame=frame, mode=mode, options=self.components[thing], widgetDict=btnDict, varOrDict=btnUserval, width=6, cols=cols, command=command, selectColour=self.selCol)
         return frame, btnDict, btnUserval
-
-
