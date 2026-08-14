@@ -191,7 +191,6 @@ class VerbTab(tab.Tab):
                             combos.append(self.verbFormExists(verb, tense, voice, mood))
         return any(combos)
     def updateAllowance(self):
-        print("updating allowance")
         self.allowed["verbs"]  = self.selected(self.setupVerbUservals)
         self.allowed["tenses"] = self.selected(self.setupTenseUservals)
         self.allowed["voices"] = self.selected(self.setupVoiceUservals)
@@ -280,7 +279,7 @@ class VerbTab(tab.Tab):
         self.updateParsingConfirmButton("???")
     def confirmParsing(self) -> None:
         """checks if the deatils entered by the user are parsingCorrect"""
-        if self.parsingLemma is None: msg.showerror("gavin", "self.parsingLemma is None"); return
+        if self.parsingLemma is None: msg.showerror("?", "self.parsingLemma is None"); return
         # get all user inputs
         userVerb, userTense, userVoice, userMood, userPerson, userGender, userCase, userNumber = list(self.whatDidTheUserParse().values())
         # timer stuff

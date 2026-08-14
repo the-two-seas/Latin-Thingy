@@ -29,7 +29,6 @@ class Konami:
         if self.sequence == KONAMI:
             self.unleash()
     def unleash(self) -> None:
-        print("unleashed!")
         songWindow = tk.Tk()
         songWindow.title("quo modo me invenisti, o imperator?")
         songWindow.resizable(False, False)

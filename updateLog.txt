@@ -10,6 +10,6 @@
 04.07.26:   1.4.0   added typing tab and linked it to results feature; fixed setup bug; moved timers to a separate class in a separate file
 13.07.26:   1.4.1   simplified code to both store and display abbrevs, rather than storing actuals and displaying abbrevs
 17.07.26:   1.4.2   added keybinds: enter to confirm, space for next
-21.07.26:   1.5.0   added nouns; started to user Git. from now on updates will be shown in Git menu in VSC.
+21.07.26:   1.5.0   added nouns; started to use Git. from now on updates will be shown in Git menu in VSC.
 
 ~~ the end ~~

@@ -83,7 +83,6 @@ class NounTab(tab.Tab):
             self.reviewDisplayor.config(text="N/A")
     # functions for SETUP
     def updateAllowance(self):
-        print("updating allowance")
         self.allowed["nouns"]  = self.selected(self.setupNounUservals)
         self.allowed["cases"] = self.selected(self.setupCaseUservals)
         self.allowed["numbers"] = self.selected(self.setupNumberUservals)
@@ -147,7 +146,7 @@ class NounTab(tab.Tab):
         self.parsingTimer.start()
     def confirmParsing(self) -> None:
         """checks if the deatils entered by the user are parsingCorrect"""
-        if self.parsingLemma is None: msg.showerror("gavin", "self.parsingLemma is None"); return
+        if self.parsingLemma is None: msg.showerror("?", "self.parsingLemma is None"); return
         # get all user inputs
         lemma, userCase, userNumber = list(self.whatDidTheUserParse().values())
         # timer stuff
