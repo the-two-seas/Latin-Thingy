@@ -1,7 +1,7 @@
 # import necessary modules
 import tkinter as tk
 from tkinter import ttk
-import verb, noun
+import verb, noun, secrets_
 # initialise constants
 WIDTH, HEIGHT = 400, 400
 DISPLAY_FONT = ("Arial", 30)
@@ -19,5 +19,7 @@ verbs = verb.VerbTab(width=WIDTH, height=HEIGHT, displayFont=DISPLAY_FONT, bgCol
 verbs.BUILD_VERB_TAB(NOTEBOOK)
 nouns = noun.NounTab(width=WIDTH, height=HEIGHT, displayFont=DISPLAY_FONT, bgCol=BG_COL, fgCol=FG_COL, selCol="#0000ff")
 nouns.BUILD_NOUN_TAB(NOTEBOOK)
+# unleash the secrets
+detector = secrets_.Konami(WINDOW)
 # RUN THE CODE!!!!!!
 WINDOW.mainloop()

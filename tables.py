@@ -233,8 +233,6 @@ def noun(nom: str, gen: str, isNeut: bool = False, i: bool = False, **overrides)
         else: raise ValueError
     return table
 
-
-
 # empty stuff
 def emptyParticiple() -> dict:
     return {
@@ -680,7 +678,6 @@ def verb(pres: str, infn: str, perf: str | None = None, ppp: str | None = None, 
     '''
 
     return table
-
 
 VERBS = {
     # REGULAR
