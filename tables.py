@@ -283,9 +283,9 @@ def analyse(parts: tuple[str, str, str, str]) -> dict:
     # deponent
     elif pres.endswith("or")  and infn.endswith("ārī") and perf.endswith("us sum") and not ppp: kind, conj, regInf = "deponent", 1,   f"{infn[:-1]}e"
     elif pres.endswith("eor") and infn.endswith("ērī") and perf.endswith("us sum") and not ppp: kind, conj, regInf = "deponent", 2,   f"{infn[:-1]}e"
+    elif pres.endswith("ior") and infn.endswith("īrī") and perf.endswith("us sum") and not ppp: kind, conj, regInf = "deponent", 4,   f"{infn[:-1]}e"
     elif pres.endswith("ior") and infn.endswith("ī")   and perf.endswith("us sum") and not ppp: kind, conj, regInf = "deponent", 3.5, f"{infn[:-3]}ere"
     elif pres.endswith("or")  and infn.endswith("ī")   and perf.endswith("us sum") and not ppp: kind, conj, regInf = "deponent", 3,   f"{infn[:-3]}ere"
-    elif pres.endswith("ior") and infn.endswith("īrī") and perf.endswith("us sum") and not ppp: kind, conj, regInf = "deponent", 4,   f"{infn[:-1]}e"
     # defective
     elif pres.endswith("ī") and infn.endswith("isse") and not perf and not ppp: kind, conj = "defective", 1  # conj doesnt matter
     else: kind, conj, regInf = "regular", 3, infn
@@ -585,6 +585,7 @@ def conjugate(parts: tuple[str], *, tense: str, voice: str, mood: str, person: s
                 case ("PERF", "ACT", "PTCP"): form = decline212(perf.removesuffix(" sum"))[gender][case][number]
                 case ("FUTR", "ACT", "PTCP"): form = decline212(f"{perf.removesuffix("us sum")}ūrus")[gender][case][number]
                 case ("FUTR", "PAS", "PTCP"): form = decline212(f"{presStem}{unmacron(vowel)}ndus")[gender][case][number]
+                case ("PRES", "ACT", "INFN"): form = infn
                 case _:
                     if voice == "PAS": form = None
                     elif tense in PRESENT_SYSTEM:
@@ -598,18 +599,22 @@ def conjugate(parts: tuple[str], *, tense: str, voice: str, mood: str, person: s
                             tense=tense, voice="PAS", mood=mood, person=person, gender=gender, case=case, number=number
                             )
         case "semideponent":
-            if (tense, voice, mood) == ("FUTR", "PAS", "PTCP"): form = decline212(f"{presStem}{unmacron(vowel)}ndus")[gender][case][number]
-            else: form = None
-            if tense in PRESENT_SYSTEM:
-                form = conjugate(
-                    (pres, infn, "???ī", "???us"),
-                    tense=tense, voice=voice, mood=mood, person=person, gender=gender, case=case, number=number
-                    )
-            elif tense in PERFECT_SYSTEM:
-                form = conjugate(
-                    ("???ō", "???ere", "???ī", perf.removesuffix(" sum")),
-                    tense=tense, voice="PAS", mood=mood, person=person, gender=gender, case=case, number=number
-                )
+            match (tense, voice, mood):
+                case ("FUTR", "ACT", "PTCP"): form = decline212(f"{ptcpStem}ūrus")[gender][case][number]
+                case ("FUTR", "ACT", "INFN"): form = f"{ptcpStem}ūrus esse"
+                case ("FUTR", "PAS", "PTCP"): form = decline212(f"{presStem}{unmacron(vowel)}ndus")[gender][case][number]
+                case _:
+                    if voice == "PAS": form = None
+                    elif tense in PRESENT_SYSTEM:
+                        form = conjugate(
+                            (pres, infn, "???ī", "???us"),
+                            tense=tense, voice=voice, mood=mood, person=person, gender=gender, case=case, number=number
+                            )
+                    elif tense in PERFECT_SYSTEM:
+                        form = conjugate(
+                            ("???ō", "???ere", "???ī", perf.removesuffix(" sum")),
+                            tense=tense, voice="PAS", mood=mood, person=person, gender=gender, case=case, number=number
+                            )
         case "defective":
             if (tense, voice, mood) == ("PRES", "ACT", "PTCP"):
                 form = decline33_i(f"{presStem}{vowel}ns", f"{presStem}{unmacron(vowel)}ntis")[gender][case][number]
@@ -664,7 +669,7 @@ def verb(pres: str, infn: str, perf: str | None = None, ppp: str | None = None, 
 
     '''
     # printing code for debugging
-    if pres == "meminī":
+    if pres in ("audeō", "meminī"):
         for t, tt in table.items():
             for v, vv in tt.items():
                 for m, mm in vv.items():
@@ -1127,6 +1132,8 @@ VERBS = {
         futr_pas_indc=inflection("fīam", "fīēs", "fīet", "fīēmus", "fīētis", "fīent"),
         futr_pas_impt=inflection(None, "fītō", "fītō", None, "fītōte", "fīuntō"),
         ),
+    # OTHER
+    "AUDEŌ": verb("audeō", "audēre", "ausus sum"),
     "MEMINĪ": verb("meminī", "meninisse", analysis_conj=3)
     }
 

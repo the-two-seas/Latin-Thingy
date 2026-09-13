@@ -10,7 +10,7 @@ BG_COL, FG_COL = "#000000", "#ffffff"
 WINDOW = tk.Tk()
 WINDOW.title("latin thingy")
 WINDOW.geometry(f"{WIDTH}x{HEIGHT}")
-#WINDOW.resizable(False, False)
+WINDOW.resizable(False, False)
 # set the main notebook up
 NOTEBOOK = ttk.Notebook(WINDOW)
 NOTEBOOK.pack(fill="both", expand=True)

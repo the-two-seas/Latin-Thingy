@@ -8,8 +8,12 @@ class LinkButton:
         self.window = window
         self.text = text
         self.url = link
-        self.button = tk.Button(self.window, text=text, font=font, width=30, command=self.clicked)
+        enter = "#aaaaaa"
+        leave = "#eeeeee"
+        self.button = tk.Button(self.window, text=text, font=font, width=30, bg=leave, command=self.clicked)
         self.button.pack()
+        self.button.bind("<Enter>", lambda e: self.button.config(bg=enter))
+        self.button.bind("<Leave>", lambda e: self.button.config(bg=leave))
     def clicked(self):
         web.open(self.url)
 
@@ -24,13 +28,13 @@ class Konami:
     def check(self, event) -> None:
         key = event.keysym
         self.sequence.append(key)
-        if len(self.sequence) > 12:
+        if len(self.sequence) > len(KONAMI):
             self.sequence.pop(0)
         if self.sequence == KONAMI:
             self.unleash()
     def unleash(self) -> None:
         songWindow = tk.Tk()
-        songWindow.title("quo modo me invenisti, o imperator?")
+        songWindow.title("ave imperator/imperatrix")
         songWindow.resizable(False, False)
         tk.Label(songWindow, text="ooh mystery buttons", font=("Arial", 15)).pack()
         moana = LinkButton(songWindow, text="ET NIL EST", link="https://www.youtube.com/watch?v=l37cqX2jBhE", font=("Arial", 15))
