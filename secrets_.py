@@ -1,10 +1,19 @@
 # secrets...
 import tkinter as tk
 import webbrowser as web
+import os, sys
+
+# logo stuff
+def resourcePath(relativePath):
+    try:
+        basePath = sys._MEIPASS
+    except AttributeError:
+        basePath = os.path.abspath(".")
+    return os.path.join(basePath, relativePath)
 
 class LinkButton:
     """pressing me will go to a link"""
-    def __init__(self, window: tk.Tk, *, text: str, link: str, font: tuple[str, int]) -> None:
+    def __init__(self, window: tk.Tk, *, text: str, link: str, font: tuple[str, int] = ("Arial", 15)) -> None:
         self.window = window
         self.text = text
         self.url = link
@@ -36,16 +45,20 @@ class Konami:
         songWindow = tk.Tk()
         songWindow.title("ave imperator/imperatrix")
         songWindow.resizable(False, False)
+        songWindow.iconbitmap(resourcePath("logo_rl.ico"))
         tk.Label(songWindow, text="ooh mystery buttons", font=("Arial", 15)).pack()
-        moana = LinkButton(songWindow, text="ET NIL EST", link="https://www.youtube.com/watch?v=l37cqX2jBhE", font=("Arial", 15))
-        never = LinkButton(songWindow, text="TETE NUMQUAM RELINQUAM", link="https://www.youtube.com/watch?v=3uiea53t1L4", font=("Arial", 15))
-        bruno = LinkButton(songWindow, text="NON LOQUENDUM'ST DE BRUNO", link="https://www.youtube.com/watch?v=LEXbnMOscZM", font=("Arial", 15))
-        simba = LinkButton(songWindow, text="EGO VOLO IAM FIERI REX", link="https://www.youtube.com/watch?v=nL_nb11qeYs", font=("Arial", 15))
-        plebs = LinkButton(songWindow, text="TRIUMPHUS ALLADINI", link="https://www.youtube.com/watch?v=8KabAJhlB8w", font=("Arial", 15))
-        maybe = LinkButton(songWindow, text="QUIDNI ME VOCES", link="https://www.youtube.com/watch?v=vpmjHLrj4Z4", font=("Arial", 15))
-        letgo = LinkButton(songWindow, text="LIBERO", link="https://www.youtube.com/watch?v=OfRrazJDARk", font=("Arial", 15))
-        billy = LinkButton(songWindow, text="IN OTIUM IBIMUS", link="https://www.youtube.com/watch?v=LUhd4GzJvmg", font=("Arial", 15))
-        ducme = LinkButton(songWindow, text="DUCE ME", link="https://www.youtube.com/watch?v=s-jdNS95Rm0", font=("Arial", 15))
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=l37cqX2jBhE", text="ET NIL EST")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=3uiea53t1L4", text="TETE NUMQUAM RELINQUAM")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=LEXbnMOscZM", text="NON LOQUENDUM'ST DE BRUNO")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=nL_nb11qeYs", text="EGO VOLO IAM FIERI REX")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=8KabAJhlB8w", text="TRIUMPHUS ALLADINI")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=vpmjHLrj4Z4", text="QUIDNI ME VOCES")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=OfRrazJDARk", text="LIBERO")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=LUhd4GzJvmg", text="IN OTIUM IBIMUS")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=s-jdNS95Rm0", text="DUCE ME")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=cA1Z_9x8v24", text="TU ES MALUS, D. Gr.")
+        LinkButton(songWindow, link="https://www.youtube.com/watch?v=9MYGBHD9iSo", text="NUNC EST BIBENDUM")
 
-
+        # find more if you can!
+        
         songWindow.mainloop()
