@@ -1,0 +1,17 @@
+# py files
+main.py
+verb.py
+noun.py
+tab.py
+timer_.py
+secrets_.py
+tables.py
+
+# other files
+logo_rl.ico
+updateLog.txt
+
+# folders
+__pycache__/
+build/
+spec/
